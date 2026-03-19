@@ -102,7 +102,22 @@ export function computePPGFromRGB(
   pixelCount: number,
   mode: string,
 ): number {
-  // Default: 2R−G−B. Assignment: add cases for redOnly, greenOnly, 2xG-R-B (Additional Work 3).
-  if (mode === 'default') return (2 * rSum - gSum - bSum) / pixelCount;
-  return (2 * rSum - gSum - bSum) / pixelCount; // fallback
+  switch (mode) {
+    case 'redOnly':
+      // Red channel only — strongest PPG signal when finger covers lens
+      return rSum / pixelCount;
+    case 'greenOnly':
+      // Green channel only — commonly used in wrist-based PPG (e.g. Apple Watch)
+      return gSum / pixelCount;
+    case 'blueOnly':
+      // Blue channel only — weakest PPG signal, useful for comparison
+      return bSum / pixelCount;
+    case 'greenDominant':
+      // 2G−R−B — emphasises green while cancelling red/blue ambient noise
+      return (2 * gSum - rSum - bSum) / pixelCount;
+    case 'default':
+    default:
+      // 2R−G−B — emphasises red, good for fingertip camera PPG
+      return (2 * rSum - gSum - bSum) / pixelCount;
+  }
 }

@@ -58,6 +58,33 @@ def save_labeled(records):
         json.dump(records, f, indent=2)
 
 
+@app.route('/upload-model', methods=['POST'])
+def upload_model():
+    global QUALITY_MODEL, QUALITY_SCALER
+    try:
+        file = request.files.get('file')
+        file_type = request.form.get('type')  # 'model' or 'scaler'
+        if not file or file_type not in ('model', 'scaler'):
+            return jsonify({'success': False, 'error': 'Missing file or invalid type'}), 400
+        filename = 'quality_model.joblib' if file_type == 'model' else 'quality_scaler.joblib'
+        save_path = os.path.join(os.path.dirname(__file__), filename)
+        file.save(save_path)
+        # Reset cached model so it reloads on next inference
+        QUALITY_MODEL = None
+        QUALITY_SCALER = None
+        return jsonify({'success': True, 'saved': filename}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/download-labeled', methods=['GET'])
+def download_labeled():
+    records = load_labeled()
+    if not records:
+        return jsonify({"error": "No labeled records found"}), 404
+    return jsonify(records)
+
+
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({"ok": True})

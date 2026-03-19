@@ -34,6 +34,9 @@ export default function Home() {
     message?: string;
   } | null>(null);
 
+  // Additional Work 2: model + scaler upload state
+  const [modelUploadStatus, setModelUploadStatus] = useState<string | null>(null);
+
   const samplesRef = useRef<number[]>([]);
   useEffect(() => {
     samplesRef.current = samples;
@@ -329,7 +332,74 @@ export default function Home() {
             Send labeled segment
           </button>
           {segmentStatus && <p className="mt-2 text-sm">{segmentStatus}</p>}
-          {/* Assignment: Add "Download labeled_records.json" button here (Additional Work 1). */}
+          {/* Additional Work 1: Download labeled_records.json button */}
+          <button
+            onClick={async () => {
+              const res = await fetch('/api/download-labeled');
+              if (!res.ok) { alert('No labeled data found yet.'); return; }
+              const blob = await res.blob();
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'labeled_records.json';
+              a.click();
+              URL.revokeObjectURL(url);
+            }}
+            className="px-4 py-2 bg-blue-500 text-white rounded"
+          >
+            Download labeled_records.json
+          </button>
+        </div>
+
+        {/* Additional Work 2: Upload model and scaler UI */}
+        <div className="mt-4 border-t pt-4">
+          <h3 className="font-medium mb-2">Upload ML model &amp; scaler</h3>
+          <p className="text-sm text-gray-600 mb-2">
+            Train a model locally with <code>train_quality_model.py</code>, then
+            upload the two <code>.joblib</code> files here to enable quality
+            inference.
+          </p>
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium">
+              Model file (<code>quality_model.joblib</code>)
+              <input
+                type="file"
+                accept=".joblib"
+                className="block mt-1 text-sm"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  setModelUploadStatus('Uploading model…');
+                  const form = new FormData();
+                  form.append('file', file);
+                  form.append('type', 'model');
+                  const res = await fetch('/api/upload-model', { method: 'POST', body: form });
+                  const data = await res.json();
+                  setModelUploadStatus(data.success ? 'Model uploaded ✓' : 'Error: ' + data.error);
+                }}
+              />
+            </label>
+            <label className="text-sm font-medium">
+              Scaler file (<code>quality_scaler.joblib</code>)
+              <input
+                type="file"
+                accept=".joblib"
+                className="block mt-1 text-sm"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  setModelUploadStatus('Uploading scaler…');
+                  const form = new FormData();
+                  form.append('file', file);
+                  form.append('type', 'scaler');
+                  const res = await fetch('/api/upload-model', { method: 'POST', body: form });
+                  const data = await res.json();
+                  setModelUploadStatus(data.success ? 'Scaler uploaded ✓' : 'Error: ' + data.error);
+                }}
+              />
+            </label>
+          </div>
+          {modelUploadStatus && <p className="mt-2 text-sm">{modelUploadStatus}</p>}
         </div>
 
         {/* Assignment: Add Upload model and scaler UI here (Additional Work 2). */}

@@ -131,6 +131,26 @@ python train_quality_model.py
 
 ---
 
+## Component Functions (Technical Overview)
+
+### Frontend (Next.js / React)
+- **Media Capture**: Uses `navigator.mediaDevices.getUserMedia()` to access camera stream and render it to a `<canvas>` element.
+- **Signal Extraction**: Samples the average pixel color from a 10x10 center region every 30ms. Extracts R, G, B channels and applies configurable formulas (e.g., `2R-G-B`).
+- **Real-time Processing**: Applies a simple moving average filter, detects peaks using threshold crossing, calculates BPM and HRV (SDNN), and updates charts via `requestAnimationFrame`.
+- **API Integration**: Sends PPG segments and heart rate data to the Flask backend via `fetch()` to `/save-record` and `/infer-quality`.
+
+### Backend (Flask / Python)
+- **REST API**: Exposes endpoints for saving records, managing labeled segments, and uploading ML models.
+- **Data Persistence**: Stores `records.json` and `labeled_records.json` in the server directory for simple JSON-based persistence.
+- **Model Inference**: Loads `quality_model.joblib` and `quality_scaler.joblib` into memory. Receives raw PPG arrays, extracts features via `ppg_features.py`, scales them, and returns quality predictions with confidence scores.
+
+### ML Pipeline
+- **Feature Extraction**: Computes statistical features from PPG segments: mean, std, skewness, kurtosis, zero-crossings, peak count, and inter-peak intervals.
+- **Training**: `train_quality_model.py` loads labeled data, splits into train/test, trains a `RandomForestClassifier`, and serializes the model + `StandardScaler` using `joblib`.
+- **Deployment**: Models are uploaded via the frontend UI, cached in Flask memory, and used for real-time inference without server restarts.
+
+---
+
 ## Acknowledgements
 
 Scaffold provided by Dr. Chun Hang Eden Ti and the BIOF3003 teaching team, HKU LKS Faculty of Medicine.

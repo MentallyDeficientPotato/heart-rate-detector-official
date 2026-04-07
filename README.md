@@ -5,6 +5,15 @@ A web-based heart rate and HRV (Heart Rate Variability) monitor that uses your d
 Developed as part of BIOF3003 – Digital Health Technologies, HKU.
 
 ---
+## Deployment
+
+### Frontend (Vercel)
+Deployed at https://heart-rate-detector.vercel.app. Connected to GitHub for automatic redeployment on every push to `main`.
+
+### Backend (PythonAnywhere)
+Deployed at https://falkalf.pythonanywhere.com. Flask backend with CORS enabled for frontend communication.
+
+---
 
 ## How it works
 
@@ -119,15 +128,6 @@ python train_quality_model.py
 | Green Only | G | Used in wrist-based PPG (e.g. smartwatches) |
 | Blue Only | B | Weakest signal, useful for comparison |
 | Green Dominant | 2G − R − B | Suppresses red/blue ambient noise |
-
----
-## Deployment
-
-### Frontend (Vercel)
-Deployed at https://heart-rate-detector.vercel.app. Connected to GitHub for automatic redeployment on every push to `main`.
-
-### Backend (PythonAnywhere)
-Deployed at https://falkalf.pythonanywhere.com. Flask backend with CORS enabled for frontend communication.
 
 ---
 
